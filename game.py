@@ -13,7 +13,22 @@ AMMO_PER_BATTERY = 10
 
 def explosion_color(progress):
     """Return an (r, g, b) colour for an explosion (progress 0..1 of its life), or None for the default."""
-    pass
+    progress = max(0.0, min(1.0, progress))
+
+    # Phase 1: White-hot to bright yellow (0.0 -> 0.3)
+    if progress < 0.3:
+        t = progress / 0.3
+        r = 255
+        g = 255
+        b = int(255 * (1 - t))  # Fade out blue channel
+    # Phase 2: Bright yellow to deep red/orange (0.3 -> 1.0)
+    else:
+        t = (progress - 0.3) / 0.7
+        r = int(255 * (1 - t * 0.3))  # Slightly dim red (255 down to ~178)
+        g = int(255 * (1 - t)**2)     # Rapidly drop green channel
+        b = 0
+
+    return (r, g, b)
 
 
 def on_city_destroyed(city):
