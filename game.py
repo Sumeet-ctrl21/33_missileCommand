@@ -31,9 +31,37 @@ def explosion_color(progress):
     return (r, g, b)
 
 
+# Add these module-level state variables at the top of your script
+SHAKE_DURATION = 0.0
+SHAKE_INTENSITY = 0
+
 def on_city_destroyed(city):
-    """Called when a city is hit; add screen shake, sounds, or a game-over warning here."""
-    pass
+    """Called when a city is hit; add screen shake, sound, or warnings here."""
+    global SHAKE_DURATION, SHAKE_INTENSITY
+    
+    # 1. Trigger screen shake parameters
+    SHAKE_DURATION = 0.35  # Shake for 0.35 seconds
+    SHAKE_INTENSITY = 8    # Max pixel offset
+
+    # 2. Trigger audio (if mixer is initialized and sound file exists)
+    try:
+        if pygame.mixer.get_init():
+            # Replace with your actual sound file path, or handle missing audio gracefully
+            pygame.mixer.Sound("city_explosion.wav").play()
+    except (pygame.error, FileNotFoundError):
+        pass  # Fall back quietly if sound asset is missing
+
+
+# To apply the screen shake in your main game loop/draw code:
+# Modify Game.draw or your main loop to offset the render surface when SHAKE_DURATION > 0:
+def get_render_offset(dt):
+    global SHAKE_DURATION, SHAKE_INTENSITY
+    if SHAKE_DURATION > 0:
+        SHAKE_DURATION -= dt
+        dx = random.randint(-SHAKE_INTENSITY, SHAKE_INTENSITY)
+        dy = random.randint(-SHAKE_INTENSITY, SHAKE_INTENSITY)
+        return dx, dy
+    return 0, 0
 
 
 def city_repair_threshold():
